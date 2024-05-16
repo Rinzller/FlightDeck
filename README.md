@@ -31,6 +31,8 @@ Flying with a virtual squadron and constantly getting updated kneeboards for you
 ## FAQ
 * Why did you make this when ED said they were working on a launcher?
   * I have had this lying around for ~2 years. With the news of ED working on their own, it inspired me to prepare this for public release so that it wouldn't go to waste
+* Why is this not open-source?
+  * I plan to open source this project after an inital grace period
 * Why should I use the FlightDeck-Installer?
   * The FlightDeck is able to keep itself and the launcher updated automatically, but only if FlightDeck-Installer is used
 * Why does FlightDeck-Installer require Administrator priviledges?
