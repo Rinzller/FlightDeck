@@ -35,6 +35,7 @@ Flying with a virtual squadron and constantly getting updated kneeboards for you
   * I plan to open source this project after an inital grace period
 * Why should I use the FlightDeck-Installer?
   * The FlightDeck is able to keep itself and the launcher updated automatically, but only if FlightDeck-Installer is used
+  * FlightDeck needs to save your settings somewhere. FlightDeck-Installer will setup the folder for this
 * Why does FlightDeck-Installer require Administrator priviledges?
   * This is needed to be able to install any application into folders like `Program-Files` and `Program-Files (x86)`
 
