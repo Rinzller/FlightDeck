@@ -52,4 +52,4 @@ If you encounter issues, please create an issue [here](https://github.com/Rinzll
   * This will require a full rewrite but should reduce the memory used by the application by 80%
 
 ## For nerds
-This application is built using Avalonia. See https://avaloniaui.net/ for me details.
+This application is built using ChatGPT and Avalonia. See https://avaloniaui.net/ for me details.
