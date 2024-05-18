@@ -19,6 +19,9 @@ FlightDeck aims to do a variety of tasks that a virtual pilot would be encourage
 Flying with a virtual squadron and constantly getting updated kneeboards for your missions? This should help...
 ![Kneeboards](.github/media/Kneeboards.png)
 
+## :exclamation: Important :exclamation:
+Please backup both your OptionsPresets found in `Saved Games\DCS(DCS.openbeta)\Config\OptionsPresets` and your kneeboards
+
 ## How to Install FlightDeck (Using the installer)
 1. Navigate [here](https://github.com/Rinzller/FlightDeck/releases)
 2. Download the `FlightDeck-Installer.exe` from the latest release
@@ -31,10 +34,14 @@ Flying with a virtual squadron and constantly getting updated kneeboards for you
 ## FAQ
 * Why did you make this when ED said they were working on a launcher?
   * I have had this lying around for ~2 years. With the news of ED working on their own, it inspired me to prepare this for public release so that it wouldn't go to waste
+* Why is this not open-source?
+  * I plan to open source this project after an inital grace period
 * Why should I use the FlightDeck-Installer?
   * The FlightDeck is able to keep itself and the launcher updated automatically, but only if FlightDeck-Installer is used
+  * FlightDeck needs to save your settings somewhere. FlightDeck-Installer will setup the folder for this
 * Why does FlightDeck-Installer require Administrator priviledges?
   * This is needed to be able to install any application into folders like `Program-Files` and `Program-Files (x86)`
+  * I have open-sourced the FlightDeck-Installer to be transparent as to why this is needed too
 
 ## Issues
 If you encounter issues, please create an issue [here](https://github.com/Rinzller/FlightDeck/issues) and include the following information
@@ -52,4 +59,4 @@ If you encounter issues, please create an issue [here](https://github.com/Rinzll
   * This will require a full rewrite but should reduce the memory used by the application by 80%
 
 ## For nerds
-This application is built using Avalonia. See https://avaloniaui.net/ for me details.
+This application is built using ChatGPT and Avalonia. See https://avaloniaui.net/ for me details.
