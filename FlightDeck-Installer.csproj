@@ -13,7 +13,7 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <SelfContained>true</SelfContained>
-    <PublishSingleFile>true</PublishSingleFile>\
+    <PublishSingleFile>true</PublishSingleFile>
     <!-- Reduce exe size -->
     <PublishTrimmed>true</PublishTrimmed>
     <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
