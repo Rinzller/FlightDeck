@@ -1,0 +1,80 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FlightDeck_Installer.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="FlightDeck_Installer.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/favicon.ico"
+        Title="FlightDeck-Installer" 
+        
+        Width="500" 
+        Height="200"
+        TransparencyLevelHint="AcrylicBlur"
+        TransparencyBackgroundFallback="Black"
+        Background="Transparent"
+        ExtendClientAreaToDecorationsHint="True"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="TextBlock.Foreground" Value="Gray"/>
+        </Style>
+        <Style Selector="ProgressBar">
+            <Setter Property="Margin" Value="30,15,30,15"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Styles>
+
+    <Panel>
+        <!-- Transparent Blur -->
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="100"
+                    MaterialOpacity="0.25" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+
+        <!-- Main Window -->
+        <StackPanel Margin="30" VerticalAlignment="Top">
+            <TextBlock Text="{Binding Message}" TextBlock.Foreground="{Binding TextColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <ProgressBar IsVisible="{Binding ProgressVisible}" Value="{Binding ProgressValue}" Minimum="0" Maximum="100" ShowProgressText="True" Height="30"/>
+        </StackPanel>
+        <Panel Margin="30" VerticalAlignment="Bottom">
+            <StackPanel HorizontalAlignment="Left">
+                <Button Foreground="Gray" BorderBrush="Gray" Margin="5" Content="Location" Command="{Binding SetInstallLocation}"/>
+                <TextBlock Margin="5" VerticalAlignment="Center" Text="{Binding InstallLocation}"/>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Right">
+                <WrapPanel IsVisible="{Binding ButtonsVisible}" HorizontalAlignment="Right">
+                    <Button Background="RoyalBlue" Margin="5" Content="Install" Command="{Binding InstallLauncher}"/>
+                    <Button Background="Red" Margin="5" Content="Uninstall" Command="{Binding UninstallLauncher}"/>
+                </WrapPanel>
+                <WrapPanel IsVisible="{Binding ButtonsVisible}">
+                    <TextBlock Text="Create Desktop Shortcut" VerticalAlignment="Center"/>
+                    <ToggleButton Content="{Binding ShortcutEnabledContent}" IsChecked="{Binding ShortcutEnabledFlag}" Margin="5,0,5,0" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
+                </WrapPanel>
+            </StackPanel>
+        </Panel>
+
+        <Panel Margin="5" VerticalAlignment="Bottom">
+            <TextBlock FontSize="11" Foreground="Gray" Text="{Binding Build}"/>
+        </Panel>
+    </Panel>
+</Window>
