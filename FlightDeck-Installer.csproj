@@ -24,18 +24,6 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
 
-  <Target Name="AddGitTagAttribute" BeforeTargets="PreBuildEvent" Condition="'$(Publishing)' == 'true'">
-    <Exec Command="git tag --sort=-version:refname | head -n 2" ConsoleToMSBuild="true">
-      <Output TaskParameter="ConsoleOutput" PropertyName="GitTag" />
-    </Exec>
-    <ItemGroup>
-      <AssemblyAttribute Include="System.Reflection.AssemblyMetadata">
-        <_Parameter1>GitTag</_Parameter1>
-        <_Parameter2>$(GitTag)</_Parameter2>
-      </AssemblyAttribute>
-    </ItemGroup>
-  </Target>
-
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />

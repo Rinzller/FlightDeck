@@ -211,6 +211,12 @@ public class MainWindowViewModel : ViewModelBase
 
             currentProgress = await DownloadFile(httpClient, flightDeckInstallerUrl, Path.Combine(InstallLocation, "FlightDeck-Installer.exe"), currentProgress, totalSteps);
 
+            // Create config.json in Local APPDATA
+            string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlightDeck");
+            CreateConfigFile(Path.Combine(localAppDataPath, "config.json"));
+            currentProgress++;
+            UpdateProgress(currentProgress / totalSteps);
+
             if (ShortcutEnabledFlag == "True")
             {
                 CreateShortcut(Path.Combine(InstallLocation, "FlightDeck.exe"), "FlightDeck");
@@ -245,7 +251,7 @@ public class MainWindowViewModel : ViewModelBase
             if (canReportProgress)
             {
                 double downloadProgress = (double)bytesDownloaded / totalBytes;
-                UpdateProgress((currentProgress + downloadProgress) / totalSteps);
+                UpdateProgress(currentProgress / totalSteps + downloadProgress / totalSteps);
             }
         });
 
@@ -304,6 +310,16 @@ public class MainWindowViewModel : ViewModelBase
         shortcut.Save(shortcutLocation);
     }
 
+    private void CreateConfigFile(string configFilePath)
+    {
+        string directory = Path.GetDirectoryName(configFilePath);
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+        File.WriteAllText(configFilePath, "{}");
+    }
+
     private void UpdateProgress(double progress)
     {
         double percentage = progress * 100;
@@ -318,7 +334,7 @@ public class MainWindowViewModel : ViewModelBase
             ProgressValue = "0";
             Message = "Uninstalling... Do not close this window.";
 
-            int totalSteps = 2;
+            int totalSteps = 3;  // Total steps increased to 3
             int currentStep = 0;
 
             if (ShortcutEnabledFlag == "True")
@@ -339,6 +355,16 @@ public class MainWindowViewModel : ViewModelBase
             {
                 Console.WriteLine("Installation folder not found.");
             }
+
+            // Delete FlightDeck folder from Local APPDATA
+            string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlightDeck");
+            if (Directory.Exists(localAppDataPath))
+            {
+                Directory.Delete(localAppDataPath, true);
+                Console.WriteLine("FlightDeck folder in Local APPDATA deleted successfully.");
+            }
+            currentStep++;
+            UpdateProgress((double)currentStep / totalSteps);
 
             ProgressValue = "100";
             Message = "Uninstall Successful! You can close this window.";
