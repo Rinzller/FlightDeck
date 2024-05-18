@@ -18,6 +18,7 @@ FlightDeck aims to do a variety of tasks that a virtual pilot would be encourage
 ## Managing Kneeboards
 Flying with a virtual squadron and constantly getting updated kneeboards for your missions? This should help...
 ![Kneeboards](.github/media/Kneeboards.png)
+Note: This will rename all of your kneeboards. Please back them up before using this.
 
 ## How to Install FlightDeck (Using the installer)
 1. Navigate [here](https://github.com/Rinzller/FlightDeck/releases)
