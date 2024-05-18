@@ -41,6 +41,7 @@ Please backup both your OptionsPresets found in `Saved Games\DCS(DCS.openbeta)\C
   * FlightDeck needs to save your settings somewhere. FlightDeck-Installer will setup the folder for this
 * Why does FlightDeck-Installer require Administrator priviledges?
   * This is needed to be able to install any application into folders like `Program-Files` and `Program-Files (x86)`
+  * I have open-sourced the FlightDeck-Installer to be transparent as to why this is needed too
 
 ## Issues
 If you encounter issues, please create an issue [here](https://github.com/Rinzller/FlightDeck/issues) and include the following information
