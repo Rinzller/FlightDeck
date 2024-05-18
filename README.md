@@ -20,7 +20,7 @@ Flying with a virtual squadron and constantly getting updated kneeboards for you
 ![Kneeboards](.github/media/Kneeboards.png)
 
 ## Important!
-$${\color{red}Please backup both your OptionsPresets found in `Saved Games\DCS(DCS.openbeta)\Config\OptionsPresets` and your kneeboards
+$${\color{red}Please backup both your OptionsPresets found in `Saved Games\DCS(DCS.openbeta)\Config\OptionsPresets` and your kneeboards}$$
 
 ## How to Install FlightDeck (Using the installer)
 1. Navigate [here](https://github.com/Rinzller/FlightDeck/releases)
