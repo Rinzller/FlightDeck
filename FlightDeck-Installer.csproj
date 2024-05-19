@@ -24,11 +24,22 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
 
+  <Target Name="AddGitTagAttribute" BeforeTargets="PreBuildEvent">
+    <Exec Command="powershell -Command &quot;git tag --sort=-version:refname | Select-Object -First 1&quot;" ConsoleToMSBuild="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitTag" />
+    </Exec>
+    <ItemGroup>
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadata">
+        <_Parameter1>GitTag</_Parameter1>
+        <_Parameter2>$(GitTag)</_Parameter2>
+      </AssemblyAttribute>
+    </ItemGroup>
+  </Target>
+
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.0.10" />

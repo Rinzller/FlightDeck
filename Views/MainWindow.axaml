@@ -73,8 +73,8 @@
             </StackPanel>
         </Panel>
 
-        <!-- <Panel Margin="5" VerticalAlignment="Bottom">
+        <Panel Margin="5" VerticalAlignment="Bottom">
             <TextBlock FontSize="11" Foreground="Gray" Text="{Binding Build}"/>
-        </Panel> -->
+        </Panel>
     </Panel>
 </Window>
