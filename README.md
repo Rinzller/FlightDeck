@@ -55,6 +55,7 @@ If you encounter issues, please create an issue [here](https://github.com/Rinzll
 * Add 'Addons' tab to allow users to start other applications when they launch DCS. Programs like SRS, VoiceAttack, etc.
 * Prettify the 'Latest Changelog' section on the 'Home' tab
 * Add the weekly newsletter to the 'Home' tab
+* Optimization, additional error handling and logging
 * Application framework conversion to Tauri
   * This will require a full rewrite but should reduce the memory used by the application by 80%
 
