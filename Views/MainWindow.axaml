@@ -63,7 +63,7 @@
             </StackPanel>
             <StackPanel HorizontalAlignment="Right">
                 <WrapPanel IsVisible="{Binding ButtonsVisible}" HorizontalAlignment="Right">
-                    <Button Background="RoyalBlue" Margin="5" Content="Install" Command="{Binding InstallLauncher}"/>
+                    <Button Background="RoyalBlue" Margin="5" Content="{Binding Action}" Command="{Binding InstallLauncher}"/>
                     <Button Background="Red" Margin="5" Content="Uninstall" Command="{Binding UninstallLauncher}"/>
                 </WrapPanel>
                 <WrapPanel IsVisible="{Binding ButtonsVisible}">

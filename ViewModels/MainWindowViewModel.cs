@@ -25,7 +25,7 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _build, value);
     }
 
-    private string? _message = "Choose the location where you want FlightDeck to be installed.";
+    private string? _message = "Choose the location where FlightDeck should be installed.";
     public string Message
     {
         get => _message;
@@ -73,8 +73,18 @@ public class MainWindowViewModel : ViewModelBase
             // Find a better way to get the first element, this SUCKS
             InstallLocation = @$"{dialog[0].Path.LocalPath}\FlightDeck\";
 
+            // Set content of the action button
+            if (!Directory.Exists(InstallLocation))
+            {
+                Action = "Install";
+            }
+            else
+            {
+                Action = "Update";
+            }
+
             // Set message to user
-            Message = "Click either Install or Uninstall!";
+            Message = $"Click either {Action} or Uninstall";
             // Unhide buttons
             ButtonsVisible = "True";
         }
@@ -115,6 +125,16 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private string? _action = "Install";
+    public string Action
+    {
+        get => _action;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _action, value);
+        }
+    }
+
     private string? _shortcutEnabledContent = "X";
     public string ShortcutEnabledContent
     {
@@ -151,7 +171,8 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            Message = "Do not close this window until the install/uninstall has completed.";
+            // Hehe...
+            Message = $"{Action}ing... Do not close this window.";
             ProgressVisible = "True";
             ProgressValue = "0";
 
@@ -225,7 +246,7 @@ public class MainWindowViewModel : ViewModelBase
             }
 
             ProgressValue = "100";
-            Message = "Install Successful! You can close this window.";
+            Message = $"{Action} Successful! You can close this window.";
             TextColor = "SpringGreen";
         }
         catch (Exception ex)
@@ -257,7 +278,8 @@ public class MainWindowViewModel : ViewModelBase
 
         using (var stream = await response.Content.ReadAsStreamAsync())
         {
-            using (var fileStream = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 8192, true))
+            // Overwrite existing file if it exists
+            using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
             {
                 await CopyToAsync(stream, fileStream, progress);
             }
@@ -365,6 +387,9 @@ public class MainWindowViewModel : ViewModelBase
             }
             currentStep++;
             UpdateProgress((double)currentStep / totalSteps);
+
+            // Set the action to install
+            Action = "Install";
 
             ProgressValue = "100";
             Message = "Uninstall Successful! You can close this window.";
