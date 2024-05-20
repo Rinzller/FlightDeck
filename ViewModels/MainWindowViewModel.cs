@@ -218,7 +218,7 @@ public class MainWindowViewModel : ViewModelBase
 
             currentProgress = await DownloadFile(httpClient, launcherUrl, Path.Combine(InstallLocation, $"{launcherName}.exe"), currentProgress, totalSteps);
 
-            // Download FlightDeck-Installer.exe
+            // Download new installer with a different name
             string installerUrl = null;
             foreach (var asset in release.RootElement.GetProperty("assets").EnumerateArray())
             {
@@ -234,7 +234,8 @@ public class MainWindowViewModel : ViewModelBase
                 throw new Exception($"{installerName}.exe not found in the latest release.");
             }
 
-            currentProgress = await DownloadFile(httpClient, installerUrl, Path.Combine(InstallLocation, $"{installerName}.exe"), currentProgress, totalSteps);
+            string newInstallerPath = Path.Combine(InstallLocation, $"{installerName}.new.exe");
+            currentProgress = await DownloadFile(httpClient, installerUrl, newInstallerPath, currentProgress, totalSteps);
 
             // Create config.json in Local APPDATA
             string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), launcherName);
@@ -258,16 +259,29 @@ public class MainWindowViewModel : ViewModelBase
                 await Task.Delay(1000); // Waits for 1000 milliseconds (1 second)
             }
 
+            // PowerShell command for renaming and deleting the installer
+            string originalInstallerPath = Path.Combine(InstallLocation, $"{installerName}.exe");
+            string powerShellCommand = $@"
+                while (Get-Process -Name '{installerName}' -ErrorAction SilentlyContinue) {{
+                    Start-Sleep -Seconds 1
+                }}
+                Remove-Item -Path '{originalInstallerPath}' -Force
+                Rename-Item -Path '{newInstallerPath}' -NewName '{originalInstallerPath}' -Force
+            ";
+
+            // Run PowerShell command asynchronously
+            RunPowerShellCommandAsync(powerShellCommand);
+
             // Launch FlightDeck.exe
             LaunchApplication(Path.Combine(InstallLocation, $"{launcherName}.exe"));
 
-            // Close the current application after 
+            // Close the current application
             Environment.Exit(0);
         }
         catch (Exception ex)
         {
             ProgressValue = "0";
-            Message = ex.Message;
+            Message = $"Please ensure FlightDeck is not running. {ex.Message}";
             TextColor = "Red";
         }
     }
