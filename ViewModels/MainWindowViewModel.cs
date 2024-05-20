@@ -2,6 +2,7 @@
 using Avalonia.Platform.Storage;
 using System;
 using System.IO;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -15,6 +16,10 @@ namespace FlightDeck_Installer.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    private static string launcherName = "FlightDeck";
+    private static string installerName = "FlightDeck-Installer";
+    private static string releaseInfoUrl = "https://api.github.com/repos/Rinzller/FlightDeck/releases/latest";
+
     // Initialize Build with data
     private string? _build = $"Build: {Assembly.GetExecutingAssembly()
                      .GetCustomAttributes<AssemblyMetadataAttribute>()
@@ -25,7 +30,7 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _build, value);
     }
 
-    private string? _message = "Choose the location where FlightDeck should be installed.";
+    private string? _message = $"Choose the location where {launcherName} should be installed.";
     public string Message
     {
         get => _message;
@@ -71,7 +76,7 @@ public class MainWindowViewModel : ViewModelBase
 
             // Set the textbox text to the user input
             // Find a better way to get the first element, this SUCKS
-            InstallLocation = @$"{dialog[0].Path.LocalPath}\FlightDeck\";
+            InstallLocation = Path.Combine(dialog[0].Path.LocalPath, launcherName);
 
             // Set content of the action button
             if (!Directory.Exists(InstallLocation))
@@ -171,6 +176,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
+            TextColor = "Gray";
             // Hehe...
             Message = $"{Action}ing... Do not close this window.";
             ProgressVisible = "True";
@@ -189,7 +195,6 @@ public class MainWindowViewModel : ViewModelBase
             var httpClient = new HttpClient();
 
             // Fetch release info from GitHub
-            var releaseInfoUrl = "https://api.github.com/repos/Rinzller/FlightDeck/releases/latest";
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("request");
             var releaseInfoResponse = await httpClient.GetAsync(releaseInfoUrl);
             releaseInfoResponse.EnsureSuccessStatusCode();
@@ -197,57 +202,68 @@ public class MainWindowViewModel : ViewModelBase
             var release = JsonDocument.Parse(releaseInfo);
 
             // Download FlightDeck.exe
-            string flightDeckExeUrl = null;
+            string launcherUrl = null;
             foreach (var asset in release.RootElement.GetProperty("assets").EnumerateArray())
             {
-                if (asset.GetProperty("name").GetString() == "FlightDeck.exe")
+                if (asset.GetProperty("name").GetString() == $"{launcherName}.exe")
                 {
-                    flightDeckExeUrl = asset.GetProperty("browser_download_url").GetString();
+                    launcherUrl = asset.GetProperty("browser_download_url").GetString();
                     break;
                 }
             }
 
-            if (string.IsNullOrEmpty(flightDeckExeUrl))
+            if (string.IsNullOrEmpty(launcherUrl))
             {
-                throw new Exception("FlightDeck.exe not found in the latest release.");
+                throw new Exception($"{launcherName}.exe not found in the latest release.");
             }
 
-            currentProgress = await DownloadFile(httpClient, flightDeckExeUrl, Path.Combine(InstallLocation, "FlightDeck.exe"), currentProgress, totalSteps);
+            currentProgress = await DownloadFile(httpClient, launcherUrl, Path.Combine(InstallLocation, $"{launcherName}.exe"), currentProgress, totalSteps);
 
             // Download FlightDeck-Installer.exe
-            string flightDeckInstallerUrl = null;
+            string installerUrl = null;
             foreach (var asset in release.RootElement.GetProperty("assets").EnumerateArray())
             {
-                if (asset.GetProperty("name").GetString() == "FlightDeck-Installer.exe")
+                if (asset.GetProperty("name").GetString() == $"{installerName}.exe")
                 {
-                    flightDeckInstallerUrl = asset.GetProperty("browser_download_url").GetString();
+                    installerUrl = asset.GetProperty("browser_download_url").GetString();
                     break;
                 }
             }
 
-            if (string.IsNullOrEmpty(flightDeckInstallerUrl))
+            if (string.IsNullOrEmpty(installerUrl))
             {
-                throw new Exception("FlightDeck-Installer.exe not found in the latest release.");
+                throw new Exception($"{installerName}.exe not found in the latest release.");
             }
 
-            currentProgress = await DownloadFile(httpClient, flightDeckInstallerUrl, Path.Combine(InstallLocation, "FlightDeck-Installer.exe"), currentProgress, totalSteps);
+            currentProgress = await DownloadFile(httpClient, installerUrl, Path.Combine(InstallLocation, $"{installerName}.exe"), currentProgress, totalSteps);
 
             // Create config.json in Local APPDATA
-            string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlightDeck");
+            string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), launcherName);
             CreateConfigFile(Path.Combine(localAppDataPath, "config.json"));
             currentProgress++;
             UpdateProgress(currentProgress / totalSteps);
 
             if (ShortcutEnabledFlag == "True")
             {
-                CreateShortcut(Path.Combine(InstallLocation, "FlightDeck.exe"), "FlightDeck");
+                CreateShortcut(Path.Combine(InstallLocation, $"{launcherName}.exe"), launcherName);
                 currentProgress++;
                 UpdateProgress(currentProgress / totalSteps);
             }
 
             ProgressValue = "100";
-            Message = $"{Action} Successful! You can close this window.";
             TextColor = "SpringGreen";
+
+            for (int i = 3; i >= 1; i--)
+            {
+                Message = $"{Action} Successful! Launching {launcherName} in {i} seconds...";
+                await Task.Delay(1000); // Waits for 1000 milliseconds (1 second)
+            }
+
+            // Launch FlightDeck.exe
+            LaunchApplication(Path.Combine(InstallLocation, $"{launcherName}.exe"));
+
+            // Close the current application after 
+            Environment.Exit(0);
         }
         catch (Exception ex)
         {
@@ -326,7 +342,7 @@ public class MainWindowViewModel : ViewModelBase
         var shortcut = new WindowsShortcut
         {
             Path = targetPath,
-            Description = "Shortcut to FlightDeck"
+            Description = $"Shortcut to {launcherName}"
         };
 
         shortcut.Save(shortcutLocation);
@@ -348,52 +364,51 @@ public class MainWindowViewModel : ViewModelBase
         ProgressValue = percentage.ToString("F0");
     }
 
-    public void UninstallLauncher()
+    public async void UninstallLauncher()
     {
         try
         {
+            TextColor = "Gray";
+            Message = "Uninstalling... Do not close this window.";
             ProgressVisible = "True";
             ProgressValue = "0";
-            Message = "Uninstalling... Do not close this window.";
 
             int totalSteps = 3;  // Total steps increased to 3
             int currentStep = 0;
 
             if (ShortcutEnabledFlag == "True")
             {
-                DeleteShortcut("FlightDeck");
+                DeleteShortcut(launcherName);
                 currentStep++;
                 UpdateProgress((double)currentStep / totalSteps);
             }
 
-            if (Directory.Exists(InstallLocation))
-            {
-                Directory.Delete(InstallLocation, true);
-                currentStep++;
-                UpdateProgress((double)currentStep / totalSteps);
-                Console.WriteLine("Installation folder deleted successfully.");
-            }
-            else
-            {
-                Console.WriteLine("Installation folder not found.");
-            }
+            // Run PowerShell commands to wait for the installer to exit and delete folders
+            string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), launcherName);
 
-            // Delete FlightDeck folder from Local APPDATA
-            string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlightDeck");
-            if (Directory.Exists(localAppDataPath))
-            {
-                Directory.Delete(localAppDataPath, true);
-                Console.WriteLine("FlightDeck folder in Local APPDATA deleted successfully.");
-            }
-            currentStep++;
-            UpdateProgress((double)currentStep / totalSteps);
+            string powerShellCommand = $@"
+                while (Get-Process -Name '{installerName}' -ErrorAction SilentlyContinue) {{
+                    Start-Sleep -Seconds 1
+                }}
+                Remove-Item -Path '{InstallLocation}' -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path '{localAppDataPath}' -Recurse -Force -ErrorAction SilentlyContinue
+            ";
 
-            // Set the action to install
-            Action = "Install";
+            // Run PowerShell command asynchronously
+            RunPowerShellCommandAsync(powerShellCommand);
 
+            // Update progress to 100% since the powershell script will handle the rest
             ProgressValue = "100";
-            Message = "Uninstall Successful! You can close this window.";
             TextColor = "SpringGreen";
+
+            for (int i = 3; i >= 1; i--)
+            {
+                Message = $"Uninstall Successful! Exiting in {i} seconds...";
+                await Task.Delay(1000); // Waits for 1000 milliseconds (1 second)
+            }
+
+            // Close the current application after 
+            Environment.Exit(0);
         }
         catch (Exception ex)
         {
@@ -401,6 +416,22 @@ public class MainWindowViewModel : ViewModelBase
             Message = $"Uninstall failed: {ex.Message}";
             TextColor = "Red";
         }
+    }
+
+    // More ChatGPT on this one...
+    private void RunPowerShellCommandAsync(string command)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "powershell",
+            Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{command}\"",
+            CreateNoWindow = true,
+            UseShellExecute = false
+        };
+
+        var process = new Process { StartInfo = startInfo };
+        process.Start();
+        // Do not wait for exit
     }
 
     private void DeleteShortcut(string shortcutName)
@@ -417,5 +448,17 @@ public class MainWindowViewModel : ViewModelBase
         {
             Console.WriteLine("Shortcut not found.");
         }
+    }
+
+    private void LaunchApplication(string applicationPath)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = applicationPath,
+            CreateNoWindow = false,
+            UseShellExecute = true
+        };
+
+        Process.Start(startInfo);
     }
 }

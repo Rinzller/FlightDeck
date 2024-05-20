@@ -17,7 +17,7 @@
     <!-- Reduce exe size -->
     <PublishTrimmed>true</PublishTrimmed>
     <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
-    <TrimMode>link</TrimMode>
+    <TrimMode>full</TrimMode>
     <!-- <SatelliteResourceLanguages>en</SatelliteResourceLanguages> -->
 
     <!-- Get git tag -->
