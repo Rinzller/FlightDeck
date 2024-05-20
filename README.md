@@ -7,6 +7,7 @@ FlightDeck aims to do a variety of tasks that a virtual pilot would be encourage
 * Keeping DCS updated
   * FlightDeck will automatically check and prompt for update when a new update becomes available
 * Toggling whether VR is used or not
+* Common optimization strategies to DCS itself to give you a few additional FPS
 * Managing kneeboards
   * FlightDeck allows you to drag-n-drop kneeboards from the web, your desktop, or other popular applications like Discord directly into your aircraft
   * FlightDeck allows you to reorder your kneeboards and how they appear in your aircraft
@@ -32,6 +33,8 @@ Please backup both your OptionsPresets found in `Saved Games\DCS(DCS.openbeta)\C
 2. Download the `FlightDeck.exe` from the latest release
 
 ## FAQ
+* I don't see my Flaming Cliffs aircraft in the Kneeboards tab?
+  * Flaming Cliffs, unfortunately works a bit different than standalone modules and therefore will take some additional time to implement. I do plan to add the functionality.
 * Why did you make this when ED said they were working on a launcher?
   * I have had this lying around for ~2 years. With the news of ED working on their own, it inspired me to prepare this for public release so that it wouldn't go to waste
 * Why is this not open-source?
@@ -56,6 +59,7 @@ If you encounter issues, please create an issue [here](https://github.com/Rinzll
 * Prettify the 'Latest Changelog' section on the 'Home' tab
 * Add the weekly newsletter to the 'Home' tab
 * Optimization, additional error handling and logging
+* Add ability for the kneeboards feature to work with Flaming Cliffs
 * Application framework conversion to Tauri
   * This will require a full rewrite but should reduce the memory used by the application by 80%
 
