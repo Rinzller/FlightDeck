@@ -177,8 +177,7 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             TextColor = "Gray";
-            // Hehe...
-            Message = $"{Action}ing... Do not close this window.";
+            Message = $"{Action} In Progress... Do not close this window.";
             ProgressVisible = "True";
             ProgressValue = "0";
 
