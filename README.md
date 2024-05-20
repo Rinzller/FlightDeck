@@ -31,6 +31,7 @@ Please backup both your OptionsPresets found in `Saved Games\DCS(DCS.openbeta)\C
 ## How to Install FlightDeck (Installing manually)
 1. Navigate [here](https://github.com/Rinzller/FlightDeck/releases)
 2. Download the `FlightDeck.exe` from the latest release
+3. Put it wherever you like though note that to uninstall everything you will need to remove `FlightDeck` from your `.APPDATA` folder
 
 ## FAQ
 * I don't see my Flaming Cliffs aircraft in the Kneeboards tab?
