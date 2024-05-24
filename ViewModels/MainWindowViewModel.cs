@@ -368,8 +368,8 @@ public class MainWindowViewModel : ViewModelBase
         if (!Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
+            File.WriteAllText(configFilePath, "{}");
         }
-        File.WriteAllText(configFilePath, "{}");
     }
 
     private void UpdateProgress(double progress)
