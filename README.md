@@ -38,14 +38,16 @@ Please backup both your OptionsPresets found in `Saved Games\DCS(DCS.openbeta)\C
   * Flaming Cliffs, unfortunately works a bit different than standalone modules and therefore will take some additional time to implement. I do plan to add the functionality.
 * Why did you make this when ED said they were working on a launcher?
   * I have had this lying around for ~2 years. With the news of ED working on their own, it inspired me to prepare this for public release so that it wouldn't go to waste
-* Why is this not open-source?
-  * I plan to open source this project after an inital grace period
+* Why is FlightDeck not open-source?
+  * I plan to open source the entire project after an inital grace period
 * Why should I use the FlightDeck-Installer?
   * The FlightDeck is able to keep itself and the launcher updated automatically, but only if FlightDeck-Installer is used
   * FlightDeck needs to save your settings somewhere. FlightDeck-Installer will setup the folder for this
+* My Installer keeps giving me errors when I try to install/update/uninstall
+  * Please download the latest installer before creating an issue
 * Why does FlightDeck-Installer require Administrator priviledges?
   * This is needed to be able to install any application into folders like `Program-Files` and `Program-Files (x86)`
-  * I have open-sourced the FlightDeck-Installer to be transparent as to why this is needed too
+  * I have open-sourced the FlightDeck-Installer to be transparent as to why this is needed
 
 ## Issues
 If you encounter issues, please create an issue [here](https://github.com/Rinzller/FlightDeck/issues) and include the following information
@@ -54,6 +56,7 @@ If you encounter issues, please create an issue [here](https://github.com/Rinzll
 * Any error message provided by either your OS or FlightDeck itself
 * The DCS version you are running
   * If you have already set your install location in FlightDeck, you can get from the top of the Home tab
+* A detailed step-by-step walkthrough of what you did to encounter the issue
 
 ## Coming Soon<sub><sup><sub><sup>TM</sup></sub></sup></sub>
 * Add 'Addons' tab to allow users to start other applications when they launch DCS. Programs like SRS, VoiceAttack, etc.
