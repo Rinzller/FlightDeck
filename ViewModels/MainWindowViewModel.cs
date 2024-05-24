@@ -20,6 +20,9 @@ public class MainWindowViewModel : ViewModelBase
     private static string installerName = "FlightDeck-Installer";
     private static string releaseInfoUrl = "https://api.github.com/repos/Rinzller/FlightDeck/releases/latest";
 
+    // Single HttpClient to avoid socket exhaustion
+    private static readonly HttpClient httpClient = new HttpClient();
+
     // Initialize Build with data
     private string? _build = $"Build: {Assembly.GetExecutingAssembly()
                      .GetCustomAttributes<AssemblyMetadataAttribute>()
@@ -191,8 +194,6 @@ public class MainWindowViewModel : ViewModelBase
             currentProgress++;
             UpdateProgress(currentProgress / totalSteps);
 
-            var httpClient = new HttpClient();
-
             // Fetch release info from GitHub
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("request");
             var releaseInfoResponse = await httpClient.GetAsync(releaseInfoUrl);
@@ -216,7 +217,7 @@ public class MainWindowViewModel : ViewModelBase
                 throw new Exception($"{launcherName}.exe not found in the latest release.");
             }
 
-            currentProgress = await DownloadFile(httpClient, launcherUrl, Path.Combine(InstallLocation, $"{launcherName}.exe"), currentProgress, totalSteps);
+            currentProgress = await DownloadFile(launcherUrl, Path.Combine(InstallLocation, $"{launcherName}.exe"), currentProgress, totalSteps);
 
             // Download new installer with a different name
             string installerUrl = null;
@@ -235,7 +236,7 @@ public class MainWindowViewModel : ViewModelBase
             }
 
             string newInstallerPath = Path.Combine(InstallLocation, $"{installerName}.new.exe");
-            currentProgress = await DownloadFile(httpClient, installerUrl, newInstallerPath, currentProgress, totalSteps);
+            currentProgress = await DownloadFile(installerUrl, newInstallerPath, currentProgress, totalSteps);
 
             // Create config.json in Local APPDATA
             string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), launcherName);
@@ -286,7 +287,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task<double> DownloadFile(HttpClient httpClient, string url, string filePath, double currentProgress, int totalSteps)
+    private async Task<double> DownloadFile(string url, string filePath, double currentProgress, int totalSteps)
     {
         var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
