@@ -50,8 +50,11 @@ Flying with a virtual squadron and constantly getting updated kneeboards for you
   * This is needed to be able to install any application into folders like `Program-Files` and `Program-Files (x86)`
   * I have open-sourced the FlightDeck-Installer to be transparent as to why this is needed
 
+## Continue the conversation
+Feel free to post any problems or suggestions on the [ED Forums](https://forum.dcs.world/topic/349094-introducing-flightdeck-a-simple-but-smart-launcher-for-dcs/)
+
 ## Issues
-If you encounter issues, please create an issue [here](https://github.com/Rinzller/FlightDeck/issues) and include the following information
+If you encounter specific issues, please create an issue [here](https://github.com/Rinzller/FlightDeck/issues) and include the following information
 * FlightDeck Build
   * This can be found in the bottom left of the window
 * Any error message provided by either your OS or FlightDeck itself
@@ -69,4 +72,4 @@ If you encounter issues, please create an issue [here](https://github.com/Rinzll
   * This will require a full rewrite but should reduce the memory used by the application by 80%
 
 ## For nerds
-This application is built using ChatGPT and Avalonia. See https://avaloniaui.net/ for me details.
+This application is built using ChatGPT and Avalonia. See https://avaloniaui.net/ for more details.
