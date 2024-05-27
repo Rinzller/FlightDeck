@@ -34,6 +34,16 @@ Flying with a virtual squadron and constantly getting updated kneeboards for you
 2. Download the `FlightDeck.exe` from the latest release
 3. Put it wherever you like though note that to uninstall everything you will need to remove `FlightDeck` from your `.APPDATA` folder
 
+## OS Requirements
+* Windows 10 or Windows 11
+
+## How does FlightDeck do optimization?
+* FlightDeck will currently do 2 forms of optimization
+  * Set Process Priority - High
+    * This will also set your VR server (oculus, steamvr, virtualdesktop) to Process Priority - High
+  * Set Core Affinity to disable Core 1
+    * The ability for it to dynamically set Core Affinity is implemented but disabled for now until further testing can be done
+
 ## FAQ
 * I don't see my Flaming Cliffs aircraft in the Kneeboards tab?
   * Flaming Cliffs, unfortunately works a bit different than standalone modules and therefore will take some additional time to implement. I do plan to add the functionality.
