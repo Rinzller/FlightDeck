@@ -38,6 +38,7 @@ Flying with a virtual squadron and constantly getting updated kneeboards for you
 * Windows 10 or Windows 11
 
 ## How does FlightDeck do optimization?
+* Enabled/Disable Optimization on the 'Utility' tab
 * FlightDeck will currently do 2 forms of optimization
   * Set Process Priority - High
     * This will also set your VR server (oculus, steamvr, virtualdesktop) to Process Priority - High
