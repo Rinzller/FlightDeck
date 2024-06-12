@@ -37,6 +37,23 @@
         <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
+		<Style Selector="ToggleButton:checked > PathIcon">
+            <Setter Property="Data" Value="{StaticResource checkbox_checked_regular}"/>
+        </Style>
+        <Style Selector="ToggleButton:not(:checked) > PathIcon">
+            <Setter Property="Data" Value="{StaticResource checkbox_unchecked_regular}"/>
+        </Style>
+        <Style Selector="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+
+            <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent"/>
+            </Style>
+
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="DimGray"/>
+            </Style>
+        </Style>
     </Window.Styles>
 
     <Panel>
@@ -68,7 +85,9 @@
                 </WrapPanel>
                 <WrapPanel IsVisible="{Binding ButtonsVisible}">
                     <TextBlock Text="Create Desktop Shortcut" VerticalAlignment="Center"/>
-                    <ToggleButton Content="{Binding ShortcutEnabledContent}" IsChecked="{Binding ShortcutEnabledFlag}" Margin="5,0,5,0" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
+                    <ToggleButton Width="18" Height="18" Margin="5" IsChecked="{Binding IsShortcutEnabled}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <PathIcon Width="18" Height="18"/>
+                    </ToggleButton>
                 </WrapPanel>
             </StackPanel>
         </Panel>

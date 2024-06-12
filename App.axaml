@@ -11,5 +11,6 @@
   
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://FlightDeck-Installer/Icons.axaml"></StyleInclude>
     </Application.Styles>
 </Application>

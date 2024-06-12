@@ -143,35 +143,11 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private string? _shortcutEnabledContent = "X";
-    public string ShortcutEnabledContent
+    private bool _isShortcutEnabled = true;
+    public bool IsShortcutEnabled
     {
-        get => _shortcutEnabledContent;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _shortcutEnabledContent, value);
-        }
-    }
-
-    private string? _shortcutEnabledFlag = "True";
-    public string ShortcutEnabledFlag
-    {
-        get => _shortcutEnabledFlag;
-        set
-        {
-            if (this.RaiseAndSetIfChanged(ref _shortcutEnabledFlag, value) != null)
-            {
-                switch (ShortcutEnabledFlag)
-                {
-                    case "True":
-                        ShortcutEnabledContent = "X";
-                        break;
-                    default:
-                        ShortcutEnabledContent = "  ";
-                        break;
-                }
-            }
-        }
+        get => _isShortcutEnabled;
+        set => this.RaiseAndSetIfChanged(ref _isShortcutEnabled, value);
     }
 
     // All of this after this point is ChatGPT
@@ -244,7 +220,7 @@ public class MainWindowViewModel : ViewModelBase
             currentProgress++;
             UpdateProgress(currentProgress / totalSteps);
 
-            if (ShortcutEnabledFlag == "True")
+            if (IsShortcutEnabled)
             {
                 CreateShortcut(Path.Combine(InstallLocation, $"{launcherName}.exe"), launcherName);
                 currentProgress++;
@@ -282,7 +258,7 @@ public class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             ProgressValue = "0";
-            Message = $"Please ensure FlightDeck is not running. {ex.Message}";
+            Message = $"Please ensure FlightDeck is not running and you are connected to the internet.";
             TextColor = "Red";
         }
     }
@@ -390,7 +366,7 @@ public class MainWindowViewModel : ViewModelBase
             int totalSteps = 3;  // Total steps increased to 3
             int currentStep = 0;
 
-            if (ShortcutEnabledFlag == "True")
+            if (IsShortcutEnabled)
             {
                 DeleteShortcut(launcherName);
                 currentStep++;
