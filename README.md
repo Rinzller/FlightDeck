@@ -83,5 +83,9 @@ If you encounter specific issues, please create an issue [here](https://github.c
 * Application framework conversion to Tauri
   * This will require a full rewrite but should reduce the memory used by the application by 80%
 
+## Thank you to the testers behind FlightDeck!
+- Grimm
+- Colin
+  
 ## For nerds
 This application is built using ChatGPT and Avalonia. See https://avaloniaui.net/ for more details.
