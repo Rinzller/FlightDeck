@@ -36,6 +36,7 @@ Add up to ten applications to launch before DCS launches...
 I have added a script to set the system time back a year to temporarily fix the F15E radar issue. You can download the script from [here](https://github.com/Rinzller/FlightDeck/tree/main/Utils) and add it to your 'Startup' list (The script requires admin). If you have suggestions of scripts you would like me to add feel free to reach out.
 * Download script and add it to your startup list
 * Check 'Launch after DCS starts'
+* Add a wait time as you need DCS to fully launch first
 * Uncheck 'Terminate after DCS exits'
   * This script will set your system time back to normal when done though you will need terminate the script on the powershell window by pressing 'Enter'
 
