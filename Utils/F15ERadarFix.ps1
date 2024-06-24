@@ -9,19 +9,19 @@ if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]
 function Cleanup {
     Write-Host "Performing cleanup actions..."
     # Start the Windows Time service
-    Start-Service w32time
+    Start-Service w32time -ErrorAction SilentlyContinue *>&1 | Out-Null
     # Force time synchronization with internet time servers
-    w32tm /resync
+    w32tm /resync *>&1 | Out-Null
     Write-Host "System time synchronized with internet time servers."
 }
 
 # Register an event handler for script termination
 Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
     Cleanup
-}
+} *>&1 | Out-Null
 
 # Stop the Windows Time service to prevent automatic time synchronization
-Stop-Service w32time -Force
+Stop-Service w32time -ErrorAction SilentlyContinue *>&1 | Out-Null
 
 # Define the date and time to set
 $NewDate = "2023-06-13 00:00:00"
@@ -30,18 +30,14 @@ $NewDate = "2023-06-13 00:00:00"
 $DateTime = [DateTime]::ParseExact($NewDate, "yyyy-MM-dd HH:mm:ss", $null)
 
 # Set the system date and time
-Set-Date -Date $DateTime
+Set-Date -Date $DateTime -ErrorAction SilentlyContinue *>&1 | Out-Null
 
 Write-Host "System date and time have been set to $NewDate."
 
-# Trap statement to catch termination
-trap {
-    Write-Host "An error occurred: $_"
+# Use try...finally to ensure cleanup runs on termination
+try {
+    # Keep the script running until Enter is pressed
+    Read-Host -Prompt "Press Enter to exit and sync time with the internet"
+} finally {
     Cleanup
-    break
-}
-
-# Keep the script running until terminated
-while ($true) {
-    Start-Sleep -Seconds 1
 }
