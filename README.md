@@ -6,6 +6,7 @@
 FlightDeck aims to do a variety of tasks that a virtual pilot would be encouraged to do outside of DCS. Some of these tasks include:
 * Keeps DCS updated
   * FlightDeck will automatically check and prompt for update when a new update becomes available
+  * FlightDeck will automatically clear your fxo and metashaders2 folders whenever the game is updated
 * Toggles VR off and on
 * Startup applications before starting DCS
   * Launch any application you want before launching DCS automatically
@@ -30,6 +31,9 @@ Flying with a virtual squadron and constantly getting updated kneeboards for you
 ## Startup Applications before DCS
 Add up to ten applications to launch before DCS launches...
 ![Kneeboards](.github/media/Startup.png)
+
+## Utility Scripts
+I have added a script to set the system time back a year to temporarily fix the F15E radar issue. You can download the script from ~[here](https://github.com/Rinzller/FlightDeck/tree/main/Utils) and add it to your 'Startup' list (The script requires admin)
 
 ## OS Requirements
 * Windows 10 or Windows 11
