@@ -33,7 +33,7 @@ Add up to ten applications to launch before DCS launches...
 ![Kneeboards](.github/media/Startup.png)
 
 ## F15E Radar Fix Script (Utility Script)
-I have added a script to set the system time back a year to temporarily fix the F15E radar issue. You can download the script from ~[here](https://github.com/Rinzller/FlightDeck/tree/main/Utils) and add it to your 'Startup' list (The script requires admin). If you have suggestions of scripts you would like me to add feel free to reach out.
+I have added a script to set the system time back a year to temporarily fix the F15E radar issue. You can download the script from [here](https://github.com/Rinzller/FlightDeck/tree/main/Utils) and add it to your 'Startup' list (The script requires admin). If you have suggestions of scripts you would like me to add feel free to reach out.
 * Download script and add it to your startup list
 * Check 'Launch after DCS starts'
 * Uncheck 'Terminate after DCS exits'
