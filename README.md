@@ -65,7 +65,7 @@ I have provided a writeup on what FlightDeck is doing to help your game run a bi
   * I have open-sourced the FlightDeck-Installer to be completely transparent as to what this application does
 
 ## Continue the conversation
-Feel free to post any problems or suggestions on the [ED Forums](https://forum.dcs.world/topic/349094-introducing-flightdeck-a-simple-but-smart-launcher-for-dcs/) or in the FlightDeck [Discord](https://discord.gg/a6XuCu28)
+Feel free to post any problems or suggestions on the [ED Forums](https://forum.dcs.world/topic/349094-introducing-flightdeck-a-simple-but-smart-launcher-for-dcs/)
 
 ## Issues
 If you encounter specific issues, please create an issue [here](https://github.com/Rinzller/FlightDeck/issues) and include the following information
