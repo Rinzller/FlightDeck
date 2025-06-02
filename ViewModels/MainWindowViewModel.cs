@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using ReactiveUI;
 using WindowsShortcutFactory;
 using System.Reflection;
@@ -19,9 +20,94 @@ public class MainWindowViewModel : ViewModelBase
     private static string launcherName = "FlightDeck";
     private static string installerName = "FlightDeck-Installer";
     private static string releaseInfoUrl = "https://api.github.com/repos/Rinzller/FlightDeck/releases/latest";
+    private string jsonFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlightDeck", "config.json");
 
     // Single HttpClient to avoid socket exhaustion
     private static readonly HttpClient httpClient = new HttpClient();
+
+    // Json data model
+    public class JsonDataModel
+    {
+        // From config.json
+        public string launcher_path { get; set; }
+        public string vr_enabled { get; set; }
+        public string install_path { get; set; }
+        public int options_preset { get; set; }
+        public string optimization_enabled { get; set; }
+        public string launcher_enabled { get; set; }
+        public List<Dictionary<string, string>> startup_apps { get; set; }
+    }
+
+    public MainWindowViewModel()
+    {
+        // Load the config.json file
+        GetConfigJson();
+    }
+
+
+    // Reused in FlightDeck-Avalonia Project
+    // Get dictionary from config file
+    public void GetConfigJson()
+    {
+        try
+        {
+            // Create the config file if it doesn't exist
+            if (!File.Exists(jsonFilePath))
+            {
+                File.Create(jsonFilePath);
+            }
+
+            // Getting JSON data from json file
+            string json = File.ReadAllText(jsonFilePath);
+            JsonDataModel data = JsonSerializer.Deserialize<JsonDataModel>(json);
+
+            InstallLocation = data.launcher_path;
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions (e.g., file not found, file access issues)
+            Console.WriteLine($"Error loading state: {ex.Message}");
+        }
+    }
+
+    // Save dictionary as config file
+    public void SetConfigJson()
+    {
+        // Initialize an empty or default instance of JsonDataModel
+        JsonDataModel data = new JsonDataModel();
+
+        // Check if the file exists and has content
+        if (File.Exists(jsonFilePath) && new FileInfo(jsonFilePath).Length > 0)
+        {
+            // Getting JSON data from json file
+            string json = File.ReadAllText(jsonFilePath);
+            try
+            {
+                // Attempt to deserialize the JSON into the data model
+                data = JsonSerializer.Deserialize<JsonDataModel>(json);
+            }
+            catch (JsonException ex)
+            {
+                // Handle JSON deserialization errors (e.g., if the JSON is malformed)
+                Console.WriteLine($"Error deserializing JSON: {ex.Message}");
+                // You might choose to log the error and/or assign default values to 'data'
+            }
+        }
+        else
+        {
+            Console.WriteLine("The file is empty or does not exist. Using default configuration.");
+            // Initialize 'data' with default values if needed
+        }
+
+        data.launcher_path = InstallLocation;
+
+         // Serialize the modified data back to a JSON string
+        var options = new JsonSerializerOptions { WriteIndented = true }; // Format the JSON for readability
+        string modifiedJson = JsonSerializer.Serialize(data, options);
+
+        // Write the modified JSON string back to the file
+        File.WriteAllText(jsonFilePath, modifiedJson);
+    }
 
     // Initialize Build with data
     private string? _build = $"Build: {Assembly.GetExecutingAssembly()
@@ -59,7 +145,14 @@ public class MainWindowViewModel : ViewModelBase
         get => _installLocation;
         set
         {
-            this.RaiseAndSetIfChanged(ref _installLocation, value);
+            if (this.RaiseAndSetIfChanged(ref _installLocation, value) != null)
+            {
+                //Set this in the config.json
+                SetConfigJson();
+
+                //Set Message
+                SetMessage();
+            }
         }
     }
 
@@ -71,16 +164,27 @@ public class MainWindowViewModel : ViewModelBase
             var provider = topLevel.StorageProvider;
             var options = new FolderPickerOpenOptions
             {
-                Title="Select your DCS install location",
+                Title = "Select your DCS install location",
                 SuggestedStartLocation = await provider.TryGetFolderFromPathAsync(@"C:\Program Files\"),
-                AllowMultiple=false
+                AllowMultiple = false
             };
             var dialog = await provider.OpenFolderPickerAsync(options);
 
             // Set the textbox text to the user input
             // Find a better way to get the first element, this SUCKS
             InstallLocation = Path.Combine(dialog[0].Path.LocalPath, launcherName);
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions (e.g., file not found, file access issues)
+            Console.WriteLine($"Error setting install location: {ex.Message}");
+        }
+    }
 
+    public void SetMessage()
+    {
+        try
+        {
             // Set content of the action button
             if (!Directory.Exists(InstallLocation))
             {
@@ -99,7 +203,7 @@ public class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             // Handle exceptions (e.g., file not found, file access issues)
-            Console.WriteLine($"Error setting install location: {ex.Message}");
+            Console.WriteLine($"Error setting install message: {ex.Message}");
         }
     }
 
