@@ -20,7 +20,8 @@ public class MainWindowViewModel : ViewModelBase
     private static string launcherName = "FlightDeck";
     private static string installerName = "FlightDeck-Installer";
     private static string releaseInfoUrl = "https://api.github.com/repos/Rinzller/FlightDeck/releases/latest";
-    private string jsonFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlightDeck", "config.json");
+    private static string configFileName = "FlightDeck-Installer.json";
+    private string jsonFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlightDeck", configFileName);
 
     // Single HttpClient to avoid socket exhaustion
     private static readonly HttpClient httpClient = new HttpClient();
@@ -28,7 +29,7 @@ public class MainWindowViewModel : ViewModelBase
     // Json data model
     public class JsonDataModel
     {
-        // From config.json
+        // From config file
         public string launcher_path { get; set; }
         public string vr_enabled { get; set; }
         public string install_path { get; set; }
@@ -40,7 +41,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        // Load the config.json file
+        // Load the config file
         GetConfigJson();
     }
 
@@ -147,7 +148,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (this.RaiseAndSetIfChanged(ref _installLocation, value) != null)
             {
-                //Set this in the config.json
+                //Set this in the config file
                 SetConfigJson();
 
                 //Set Message
@@ -318,9 +319,9 @@ public class MainWindowViewModel : ViewModelBase
             string newInstallerPath = Path.Combine(InstallLocation, $"{installerName}.new.exe");
             currentProgress = await DownloadFile(installerUrl, newInstallerPath, currentProgress, totalSteps);
 
-            // Create config.json in Local APPDATA
+            // Create config file in Local APPDATA
             string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), launcherName);
-            CreateConfigFile(Path.Combine(localAppDataPath, "config.json"));
+            CreateConfigFile(Path.Combine(localAppDataPath, configFileName));
             currentProgress++;
             UpdateProgress(currentProgress / totalSteps);
 
