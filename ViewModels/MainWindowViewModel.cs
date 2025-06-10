@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using ReactiveUI;
 using WindowsShortcutFactory;
 using System.Reflection;
