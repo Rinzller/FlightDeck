@@ -31,12 +31,6 @@ public class MainWindowViewModel : ViewModelBase
     {
         // From config file
         public string launcher_path { get; set; }
-        public string vr_enabled { get; set; }
-        public string install_path { get; set; }
-        public int options_preset { get; set; }
-        public string optimization_enabled { get; set; }
-        public string launcher_enabled { get; set; }
-        public List<Dictionary<string, string>> startup_apps { get; set; }
     }
 
     public MainWindowViewModel()
