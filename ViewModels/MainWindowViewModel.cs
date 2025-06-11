@@ -48,14 +48,26 @@ public class MainWindowViewModel : ViewModelBase
             // Create the config file if it doesn't exist
             if (!File.Exists(jsonFilePath))
             {
-                File.Create(jsonFilePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(jsonFilePath));
+                using (File.Create(jsonFilePath))
+                {
+                    // The file is created and the FileStream is disposed of immediately
+                }
             }
 
             // Getting JSON data from json file
             string json = File.ReadAllText(jsonFilePath);
-            JsonDataModel data = JsonSerializer.Deserialize<JsonDataModel>(json);
+            JsonDataModel? data = JsonSerializer.Deserialize<JsonDataModel>(json);
 
-            InstallLocation = data.launcher_path;
+            // Check if data is null
+            if (data != null)
+            {
+                InstallLocation = data.launcher_path;
+            }
+            else
+            {
+                Console.WriteLine("Deserialization returned null.");
+            }
         }
         catch (Exception ex)
         {
