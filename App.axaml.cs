@@ -62,7 +62,6 @@ public partial class App : Application
             {
                 FileName = logFilePath, // Logs next to executable
                 Layout = "${longdate} [${level}] ${message}",
-                ConcurrentWrites = true,
                 KeepFileOpen = false,
                 Encoding = Encoding.UTF8
             };
