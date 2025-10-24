@@ -76,7 +76,7 @@
         <Panel Margin="30" VerticalAlignment="Bottom">
             <StackPanel HorizontalAlignment="Left">
                 <Button Foreground="Gray" BorderBrush="Gray" Margin="5" Content="Location" Command="{Binding SetInstallLocation}"/>
-                <TextBlock Margin="5" VerticalAlignment="Center" Text="{Binding InstallLocation}"/>
+                <TextBlock Width="200" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" Margin="5" VerticalAlignment="Center" Text="{Binding InstallLocation}"/>
             </StackPanel>
             <StackPanel HorizontalAlignment="Right">
                 <WrapPanel IsVisible="{Binding ButtonsVisible}" HorizontalAlignment="Right">
