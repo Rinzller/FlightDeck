@@ -74,6 +74,11 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private bool InstallLocationRequiresAdministrator() =>
+        !string.IsNullOrWhiteSpace(InstallLocation) &&
+        !IsRunningAsAdministrator() &&
+        !CanWriteToInstallLocation();
+
     private bool RestartElevatedIfNeeded()
     {
         if (CanWriteToInstallLocation() || IsRunningAsAdministrator())
@@ -216,6 +221,20 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private string _adminWarningVisible = "False";
+    public string AdminWarningVisible
+    {
+        get => _adminWarningVisible;
+        set => this.RaiseAndSetIfChanged(ref _adminWarningVisible, value);
+    }
+
+    private string _adminWarningMessage = "This install location requires administrator approval.";
+    public string AdminWarningMessage
+    {
+        get => _adminWarningMessage;
+        set => this.RaiseAndSetIfChanged(ref _adminWarningMessage, value);
+    }
+
     private string _installLocation = string.Empty;
     public string InstallLocation
     {
@@ -233,6 +252,7 @@ public class MainWindowViewModel : ViewModelBase
 
                 //Set Message
                 SetMessage();
+                UpdateAdminWarning();
             }
         }
     }
@@ -278,15 +298,38 @@ public class MainWindowViewModel : ViewModelBase
                 Action = "Update";
             }
 
+            var requiresAdministrator = InstallLocationRequiresAdministrator();
+            if (requiresAdministrator)
+            {
+                Action = "Run as Admin";
+            }
+
             // Set message to user
-            Message = $"Click either {Action} or Uninstall";
+            Message = requiresAdministrator
+                ? "Click Run as Admin to continue."
+                : $"Click either {Action} or Uninstall";
             // Unhide buttons
             ButtonsVisible = "True";
+            UpdateAdminWarning();
         }
         catch (Exception ex)
         {
             // Handle exceptions (e.g., file not found, file access issues)
             Console.WriteLine($"Error setting install message: {ex.Message}");
+        }
+    }
+
+    private void UpdateAdminWarning()
+    {
+        if (InstallLocationRequiresAdministrator())
+        {
+            AdminWarningMessage = "This install location requires elevated permissions.";
+            AdminWarningVisible = "True";
+            Action = "Run as Admin";
+        }
+        else
+        {
+            AdminWarningVisible = "False";
         }
     }
 
@@ -343,15 +386,16 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             TextColor = "Gray";
-            Message = $"{Action} In Progress... Do not close this window.";
-            ProgressVisible = "True";
-            ProgressValue = 0;
 
             if (string.IsNullOrWhiteSpace(InstallLocation))
                 throw new InvalidOperationException("Install location is not set.");
 
             if (RestartElevatedIfNeeded())
                 return;
+
+            Message = $"{Action} In Progress... Do not close this window.";
+            ProgressVisible = "True";
+            ProgressValue = 0;
 
             if (!Directory.Exists(InstallLocation))
             {
@@ -404,16 +448,37 @@ public class MainWindowViewModel : ViewModelBase
             string newInstallerPath = Path.Combine(InstallLocation, $"{installerName}.new.exe");
             await DownloadFile(installerUrl, newInstallerPath, 65, 20);
 
+            Message = "Writing FlightDeck settings...";
+            UpdateProgress(86);
+            await Task.Delay(50);
+
             // Create config file in Local APPDATA
             string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), launcherName);
-            CreateConfigFile(Path.Combine(localAppDataPath, configFileName));
+            await Task.Run(() => CreateConfigFile(Path.Combine(localAppDataPath, configFileName)));
             UpdateProgress(90);
+            await Task.Delay(50);
 
+            Message = "Creating shortcuts...";
             if (IsShortcutEnabled)
             {
-                CreateShortcut(Path.Combine(InstallLocation, $"{launcherName}.exe"), launcherName);
+                try
+                {
+                    await RunWithTimeoutAsync(
+                        () => CreateShortcut(Path.Combine(InstallLocation, $"{launcherName}.exe"), launcherName),
+                        TimeSpan.FromSeconds(5),
+                        "Shortcut creation timed out.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Shortcut creation failed: {ex.Message}");
+                }
             }
-            UpdateProgress(95);
+            UpdateProgress(94);
+            await Task.Delay(50);
+
+            Message = "Finishing installation...";
+            UpdateProgress(98);
+            await Task.Delay(50);
 
             UpdateProgress(100);
             TextColor = "SpringGreen";
@@ -452,8 +517,21 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private static async Task RunWithTimeoutAsync(Action action, TimeSpan timeout, string timeoutMessage)
+    {
+        var task = Task.Run(action);
+        var completedTask = await Task.WhenAny(task, Task.Delay(timeout));
+        if (completedTask != task)
+            throw new TimeoutException(timeoutMessage);
+
+        await task;
+    }
+
     private async Task DownloadFile(string url, string filePath, double startPercent, double percentSpan)
     {
+        Message = $"Downloading {Path.GetFileName(filePath)}...";
+        var tempFilePath = $"{filePath}.download";
+
         var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
 
@@ -473,14 +551,16 @@ public class MainWindowViewModel : ViewModelBase
 
         using (var stream = await response.Content.ReadAsStreamAsync())
         {
-            // Overwrite existing file if it exists
-            using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+            using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
             {
                 await CopyToAsync(stream, fileStream, progress);
             }
         }
 
+        File.Move(tempFilePath, filePath, true);
         UpdateProgress(startPercent + percentSpan);
+        Message = $"Downloaded {Path.GetFileName(filePath)}.";
+        await Task.Delay(50);
     }
 
     private async Task CopyToAsync(Stream source, Stream destination, IProgress<long>? progress = null, int bufferSize = 81920)
@@ -545,15 +625,16 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             TextColor = "Gray";
-            Message = "Uninstalling... Do not close this window.";
-            ProgressVisible = "True";
-            ProgressValue = 0;
 
             if (string.IsNullOrWhiteSpace(InstallLocation))
                 throw new InvalidOperationException("Install location is not set.");
 
             if (RestartElevatedIfNeeded())
                 return;
+
+            Message = "Uninstalling... Do not close this window.";
+            ProgressVisible = "True";
+            ProgressValue = 0;
 
             if (IsShortcutEnabled)
             {

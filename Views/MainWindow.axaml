@@ -30,6 +30,8 @@
         </Style>
         <Style Selector="ProgressBar">
             <Setter Property="Margin" Value="30,15,30,15"/>
+            <Setter Property="Foreground" Value="RoyalBlue"/>
+            <Setter Property="Background" Value="#242424"/>
         </Style>
         <Style Selector="Button">
             <Setter Property="Cursor" Value="Hand"/>
@@ -89,7 +91,29 @@
         <!-- Main Window -->
         <StackPanel Margin="30" VerticalAlignment="Top">
             <TextBlock Text="{Binding Message}" TextBlock.Foreground="{Binding TextColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            <ProgressBar IsVisible="{Binding ProgressVisible}" Value="{Binding ProgressValue}" Minimum="0" Maximum="100" ShowProgressText="True" Height="30"/>
+            <TextBlock Text="{Binding AdminWarningMessage}"
+                       IsVisible="{Binding AdminWarningVisible}"
+                       Foreground="#FFB347"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       Margin="0,6,0,0"/>
+            <Grid IsVisible="{Binding ProgressVisible}" Margin="30,15,30,15">
+                <ProgressBar Value="{Binding ProgressValue}"
+                             Minimum="0"
+                             Maximum="100"
+                             Foreground="RoyalBlue"
+                             Background="#242424"
+                             Margin="0"
+                             Height="18"/>
+                <TextBlock Text="{Binding ProgressValue, StringFormat='{}{0:0}%'}"
+                           Foreground="White"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Grid>
         </StackPanel>
         <Panel Margin="30" VerticalAlignment="Bottom">
             <StackPanel HorizontalAlignment="Left">
