@@ -11,16 +11,19 @@ using WindowsShortcutFactory;
 using System.Reflection;
 using System.Linq;
 using FlightDeck_Installer.Views;
+using System.Security.Principal;
 
 namespace FlightDeck_Installer.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private static string launcherName = "FlightDeck";
-    private static string installerName = "FlightDeck-Installer";
-    private static string releaseInfoUrl = "https://api.github.com/repos/Rinzller/FlightDeck/releases/latest";
-    private static string configFileName = "FlightDeck-Installer.json";
-    private string jsonFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlightDeck", configFileName);
+    private static readonly string launcherName = "FlightDeck";
+    private static readonly string installerName = "FlightDeck-Installer";
+    private static readonly string releaseInfoUrl = "https://api.github.com/repos/Rinzller/FlightDeck/releases/latest";
+    private static readonly string configFileName = "FlightDeck-Installer.json";
+    private readonly string jsonFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlightDeck", configFileName);
+    private static readonly string DefaultInstallParent =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs");
 
     // Single HttpClient to avoid socket exhaustion
     private static readonly HttpClient httpClient = new HttpClient();
@@ -29,13 +32,78 @@ public class MainWindowViewModel : ViewModelBase
     public class JsonDataModel
     {
         // From config file
-        public string launcher_path { get; set; }
+        public string launcher_path { get; set; } = string.Empty;
     }
 
     public MainWindowViewModel()
     {
         // Load the config file
         GetConfigJson();
+
+        if (string.IsNullOrWhiteSpace(InstallLocation))
+            InstallLocation = Path.Combine(DefaultInstallParent, launcherName);
+    }
+
+    private static bool IsRunningAsAdministrator()
+    {
+        using var identity = WindowsIdentity.GetCurrent();
+        var principal = new WindowsPrincipal(identity);
+        return principal.IsInRole(WindowsBuiltInRole.Administrator);
+    }
+
+    private bool CanWriteToInstallLocation()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(InstallLocation))
+                return false;
+
+            Directory.CreateDirectory(InstallLocation);
+            var probe = Path.Combine(InstallLocation, $".flightdeck_write_test_{Guid.NewGuid():N}.tmp");
+            File.WriteAllText(probe, string.Empty);
+            File.Delete(probe);
+            return true;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+    }
+
+    private bool RestartElevatedIfNeeded()
+    {
+        if (CanWriteToInstallLocation() || IsRunningAsAdministrator())
+            return false;
+
+        SetConfigJson();
+
+        try
+        {
+            var exePath = Environment.ProcessPath
+                ?? Process.GetCurrentProcess().MainModule?.FileName
+                ?? throw new InvalidOperationException("Unable to locate installer executable.");
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = exePath,
+                UseShellExecute = true,
+                Verb = "runas"
+            });
+
+            Environment.Exit(0);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unable to restart elevated: {ex.Message}");
+            Message = "This location requires administrator access. Please approve the elevation prompt or choose another location.";
+            TextColor = "Red";
+            return true;
+        }
     }
 
 
@@ -48,16 +116,19 @@ public class MainWindowViewModel : ViewModelBase
             // Create the config file if it doesn't exist
             if (!File.Exists(jsonFilePath))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(jsonFilePath));
-                using (File.Create(jsonFilePath))
-                {
-                    // The file is created and the FileStream is disposed of immediately
-                }
+                var directory = Path.GetDirectoryName(jsonFilePath);
+                if (!string.IsNullOrWhiteSpace(directory))
+                    Directory.CreateDirectory(directory);
+
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                File.WriteAllText(jsonFilePath, JsonSerializer.Serialize(new JsonDataModel(), options));
             }
 
             // Getting JSON data from json file
             string json = File.ReadAllText(jsonFilePath);
-            JsonDataModel? data = JsonSerializer.Deserialize<JsonDataModel>(json);
+            JsonDataModel? data = string.IsNullOrWhiteSpace(json)
+                ? new JsonDataModel()
+                : JsonSerializer.Deserialize<JsonDataModel>(json);
 
             // Check if data is null
             if (data != null)
@@ -90,7 +161,7 @@ public class MainWindowViewModel : ViewModelBase
             try
             {
                 // Attempt to deserialize the JSON into the data model
-                data = JsonSerializer.Deserialize<JsonDataModel>(json);
+                data = JsonSerializer.Deserialize<JsonDataModel>(json) ?? new JsonDataModel();
             }
             catch (JsonException ex)
             {
@@ -116,16 +187,16 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     // Initialize Build with data
-    private string? _build = $"Build: {Assembly.GetExecutingAssembly()
+    private string _build = $"Build: {Assembly.GetExecutingAssembly()
                      .GetCustomAttributes<AssemblyMetadataAttribute>()
                      .FirstOrDefault(a => a.Key == "GitTag")?.Value ?? "<Unknown>"}";
-    public string? Build
+    public string Build
     {
         get => _build;
         set => this.RaiseAndSetIfChanged(ref _build, value);
     }
 
-    private string? _message = $"Choose the location where {launcherName} should be installed.";
+    private string _message = $"Choose the location where {launcherName} should be installed.";
     public string Message
     {
         get => _message;
@@ -135,7 +206,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private string? _textColor = "Gray";
+    private string _textColor = "Gray";
     public string TextColor
     {
         get => _textColor;
@@ -145,13 +216,17 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private string? _installLocation;
+    private string _installLocation = string.Empty;
     public string InstallLocation
     {
         get => _installLocation;
         set
         {
-            if (this.RaiseAndSetIfChanged(ref _installLocation, value) != null)
+            if (_installLocation == value) return;
+
+            this.RaiseAndSetIfChanged(ref _installLocation, value);
+
+            if (!string.IsNullOrWhiteSpace(_installLocation))
             {
                 //Set this in the config file
                 SetConfigJson();
@@ -167,18 +242,17 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             var topLevel = TopLevel.GetTopLevel(MainWindow.Instance);
-            var provider = topLevel.StorageProvider;
+            var provider = topLevel?.StorageProvider ?? throw new InvalidOperationException("No storage provider.");
             var options = new FolderPickerOpenOptions
             {
-                Title = "Select your DCS install location",
-                SuggestedStartLocation = await provider.TryGetFolderFromPathAsync(@"C:\Program Files\"),
+                Title = "Select the FlightDeck install parent folder",
+                SuggestedStartLocation = await provider.TryGetFolderFromPathAsync(DefaultInstallParent),
                 AllowMultiple = false
             };
             var dialog = await provider.OpenFolderPickerAsync(options);
 
-            // Set the textbox text to the user input
-            // Find a better way to get the first element, this SUCKS
-            InstallLocation = Path.Combine(dialog[0].Path.LocalPath, launcherName);
+            if (dialog.Any())
+                InstallLocation = Path.Combine(dialog[0].Path.LocalPath, launcherName);
         }
         catch (Exception ex)
         {
@@ -192,6 +266,9 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             // Set content of the action button
+            if (string.IsNullOrWhiteSpace(InstallLocation))
+                return;
+
             if (!Directory.Exists(InstallLocation))
             {
                 Action = "Install";
@@ -213,7 +290,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private string? _buttonsVisible = "False";
+    private string _buttonsVisible = "False";
     public string ButtonsVisible
     {
         get => _buttonsVisible;
@@ -223,7 +300,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private string? _progressVisible = "False";
+    private string _progressVisible = "False";
     public string ProgressVisible
     {
         get => _progressVisible;
@@ -233,8 +310,8 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private string? _progressValue;
-    public string ProgressValue
+    private double _progressValue;
+    public double ProgressValue
     {
         get => _progressValue;
         set
@@ -243,7 +320,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private string? _action = "Install";
+    private string _action = "Install";
     public string Action
     {
         get => _action;
@@ -268,17 +345,19 @@ public class MainWindowViewModel : ViewModelBase
             TextColor = "Gray";
             Message = $"{Action} In Progress... Do not close this window.";
             ProgressVisible = "True";
-            ProgressValue = "0";
+            ProgressValue = 0;
 
-            int totalSteps = 4;  // Total steps increased to 4
-            double currentProgress = 0;
+            if (string.IsNullOrWhiteSpace(InstallLocation))
+                throw new InvalidOperationException("Install location is not set.");
+
+            if (RestartElevatedIfNeeded())
+                return;
 
             if (!Directory.Exists(InstallLocation))
             {
                 Directory.CreateDirectory(InstallLocation);
             }
-            currentProgress++;
-            UpdateProgress(currentProgress / totalSteps);
+            UpdateProgress(5);
 
             // Fetch release info from GitHub
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("request");
@@ -286,9 +365,10 @@ public class MainWindowViewModel : ViewModelBase
             releaseInfoResponse.EnsureSuccessStatusCode();
             var releaseInfo = await releaseInfoResponse.Content.ReadAsStringAsync();
             var release = JsonDocument.Parse(releaseInfo);
+            UpdateProgress(10);
 
             // Download FlightDeck.exe
-            string launcherUrl = null;
+            string? launcherUrl = null;
             foreach (var asset in release.RootElement.GetProperty("assets").EnumerateArray())
             {
                 if (asset.GetProperty("name").GetString() == $"{launcherName}.exe")
@@ -303,10 +383,10 @@ public class MainWindowViewModel : ViewModelBase
                 throw new Exception($"{launcherName}.exe not found in the latest release.");
             }
 
-            currentProgress = await DownloadFile(launcherUrl, Path.Combine(InstallLocation, $"{launcherName}.exe"), currentProgress, totalSteps);
+            await DownloadFile(launcherUrl, Path.Combine(InstallLocation, $"{launcherName}.exe"), 10, 55);
 
             // Download new installer with a different name
-            string installerUrl = null;
+            string? installerUrl = null;
             foreach (var asset in release.RootElement.GetProperty("assets").EnumerateArray())
             {
                 if (asset.GetProperty("name").GetString() == $"{installerName}.exe")
@@ -322,22 +402,20 @@ public class MainWindowViewModel : ViewModelBase
             }
 
             string newInstallerPath = Path.Combine(InstallLocation, $"{installerName}.new.exe");
-            currentProgress = await DownloadFile(installerUrl, newInstallerPath, currentProgress, totalSteps);
+            await DownloadFile(installerUrl, newInstallerPath, 65, 20);
 
             // Create config file in Local APPDATA
             string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), launcherName);
             CreateConfigFile(Path.Combine(localAppDataPath, configFileName));
-            currentProgress++;
-            UpdateProgress(currentProgress / totalSteps);
+            UpdateProgress(90);
 
             if (IsShortcutEnabled)
             {
                 CreateShortcut(Path.Combine(InstallLocation, $"{launcherName}.exe"), launcherName);
-                currentProgress++;
-                UpdateProgress(currentProgress / totalSteps);
             }
+            UpdateProgress(95);
 
-            ProgressValue = "100";
+            UpdateProgress(100);
             TextColor = "SpringGreen";
 
             for (int i = 3; i >= 1; i--)
@@ -367,13 +445,14 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ProgressValue = "0";
+            Console.WriteLine($"Install failed: {ex.Message}");
+            ProgressValue = 0;
             Message = $"Please ensure FlightDeck is not running and you are connected to the internet.";
             TextColor = "Red";
         }
     }
 
-    private async Task<double> DownloadFile(string url, string filePath, double currentProgress, int totalSteps)
+    private async Task DownloadFile(string url, string filePath, double startPercent, double percentSpan)
     {
         var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
@@ -388,7 +467,7 @@ public class MainWindowViewModel : ViewModelBase
             if (canReportProgress)
             {
                 double downloadProgress = (double)bytesDownloaded / totalBytes;
-                UpdateProgress(currentProgress / totalSteps + downloadProgress / totalSteps);
+                UpdateProgress(startPercent + (downloadProgress * percentSpan));
             }
         });
 
@@ -401,12 +480,10 @@ public class MainWindowViewModel : ViewModelBase
             }
         }
 
-        currentProgress++;
-        UpdateProgress(currentProgress / totalSteps);
-        return currentProgress;
+        UpdateProgress(startPercent + percentSpan);
     }
 
-    private async Task CopyToAsync(Stream source, Stream destination, IProgress<long> progress = null, int bufferSize = 81920)
+    private async Task CopyToAsync(Stream source, Stream destination, IProgress<long>? progress = null, int bufferSize = 81920)
     {
         if (source == null)
         {
@@ -424,12 +501,10 @@ public class MainWindowViewModel : ViewModelBase
         }
 
         var buffer = new byte[bufferSize];
-        long totalBytesRead = 0;
         int bytesRead;
         while ((bytesRead = await source.ReadAsync(buffer, 0, buffer.Length)) != 0)
         {
             await destination.WriteAsync(buffer, 0, bytesRead);
-            totalBytesRead += bytesRead;
             progress?.Report(bytesRead);
         }
     }
@@ -450,18 +525,19 @@ public class MainWindowViewModel : ViewModelBase
 
     private void CreateConfigFile(string configFilePath)
     {
-        string directory = Path.GetDirectoryName(configFilePath);
-        if (!Directory.Exists(directory))
+        string? directory = Path.GetDirectoryName(configFilePath);
+        if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
-            File.WriteAllText(configFilePath, "{}");
         }
+
+        if (!File.Exists(configFilePath))
+            File.WriteAllText(configFilePath, "{}");
     }
 
     private void UpdateProgress(double progress)
     {
-        double percentage = progress * 100;
-        ProgressValue = percentage.ToString("F0");
+        ProgressValue = Math.Clamp(progress, 0, 100);
     }
 
     public async void UninstallLauncher()
@@ -471,16 +547,18 @@ public class MainWindowViewModel : ViewModelBase
             TextColor = "Gray";
             Message = "Uninstalling... Do not close this window.";
             ProgressVisible = "True";
-            ProgressValue = "0";
+            ProgressValue = 0;
 
-            int totalSteps = 3;  // Total steps increased to 3
-            int currentStep = 0;
+            if (string.IsNullOrWhiteSpace(InstallLocation))
+                throw new InvalidOperationException("Install location is not set.");
+
+            if (RestartElevatedIfNeeded())
+                return;
 
             if (IsShortcutEnabled)
             {
                 DeleteShortcut(launcherName);
-                currentStep++;
-                UpdateProgress((double)currentStep / totalSteps);
+                UpdateProgress(30);
             }
 
             // Run PowerShell commands to wait for the installer to exit and delete folders
@@ -498,7 +576,7 @@ public class MainWindowViewModel : ViewModelBase
             RunPowerShellCommandAsync(powerShellCommand);
 
             // Update progress to 100% since the powershell script will handle the rest
-            ProgressValue = "100";
+            UpdateProgress(100);
             TextColor = "SpringGreen";
 
             for (int i = 3; i >= 1; i--)
@@ -512,7 +590,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ProgressValue = "0";
+            ProgressValue = 0;
             Message = $"Uninstall failed: {ex.Message}";
             TextColor = "Red";
         }

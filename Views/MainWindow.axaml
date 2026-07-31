@@ -32,7 +32,25 @@
             <Setter Property="Margin" Value="30,15,30,15"/>
         </Style>
         <Style Selector="Button">
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.Primary">
+            <Setter Property="Background" Value="RoyalBlue"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.Secondary">
+            <Setter Property="Background" Value="#2E2E2E"/>
+            <Setter Property="BorderBrush" Value="#666666"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Button.Danger">
+            <Setter Property="Background" Value="#B52626"/>
+            <Setter Property="BorderThickness" Value="0"/>
         </Style>
         <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Cursor" Value="Hand"/>
@@ -75,13 +93,13 @@
         </StackPanel>
         <Panel Margin="30" VerticalAlignment="Bottom">
             <StackPanel HorizontalAlignment="Left">
-                <Button Foreground="Gray" BorderBrush="Gray" Margin="5" Content="Location" Command="{Binding SetInstallLocation}"/>
+                <Button Classes="Secondary" Margin="5" Content="Location" Command="{Binding SetInstallLocation}"/>
                 <TextBlock Width="200" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" Margin="5" VerticalAlignment="Center" Text="{Binding InstallLocation}"/>
             </StackPanel>
             <StackPanel HorizontalAlignment="Right">
                 <WrapPanel IsVisible="{Binding ButtonsVisible}" HorizontalAlignment="Right">
-                    <Button Background="Red" Margin="5" Content="Uninstall" Command="{Binding UninstallLauncher}"/>
-                    <Button Background="RoyalBlue" Margin="5" Content="{Binding Action}" Command="{Binding InstallLauncher}"/>
+                    <Button Classes="Danger" Margin="5" Content="Uninstall" Command="{Binding UninstallLauncher}"/>
+                    <Button Classes="Primary" Margin="5" Content="{Binding Action}" Command="{Binding InstallLauncher}"/>
                 </WrapPanel>
                 <WrapPanel IsVisible="{Binding ButtonsVisible}">
                     <TextBlock Text="Create Desktop Shortcut" VerticalAlignment="Center"/>

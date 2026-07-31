@@ -89,7 +89,7 @@ public class LoggerTextWriter : TextWriter
         _logger = logger;
     }
 
-    public override void WriteLine(string value)
+    public override void WriteLine(string? value)
     {
         if (!string.IsNullOrWhiteSpace(value))
         {
