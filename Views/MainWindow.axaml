@@ -7,7 +7,7 @@
         x:Class="FlightDeck_Installer.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/favicon.ico"
-        Title="FlightDeck-Installer" 
+        Title=" " 
         
         Width="500" 
         Height="200"
@@ -16,6 +16,7 @@
         Background="Transparent"
         ExtendClientAreaToDecorationsHint="True"
         CanResize="False"
+        CanMaximize="False"
         WindowStartupLocation="CenterScreen">
 
     <Design.DataContext>
