@@ -11,11 +11,11 @@ FlightDeck aims to do a variety of tasks that a virtual pilot would be encourage
 * Startup applications before starting DCS
   * Launch any application you want before launching DCS automatically
   * Ex. SRS, VoiceAttack, TobiiGamehub, Simshaker, etc.
-* Game optimization... see below
 * Manages kneeboards
   * FlightDeck allows you to drag-n-drop kneeboards from the web, your desktop, or other popular applications like Discord directly into your aircraft
   * FlightDeck allows you to reorder your kneeboards and how they appear in your aircraft
   * FlightDeck allows you to remove unused or unwanted kneeboards from your aircraft
+* Manage installed modules easily
 * Change any DCS setting that would require a restart
   * Any DCS setting that would force a restart has now been moved here and allows you to change those settings before launching the game thus removing the need to restart the game... since it hasn't been started yet.
 * Cleaning and/or repairing DCS
@@ -44,9 +44,6 @@ Add up to ten applications to launch before DCS launches...
 1. Navigate [here](https://github.com/Rinzller/FlightDeck/releases)
 2. Download the `FlightDeck.exe` from the latest release
 3. Put it wherever you like though note that to uninstall everything you will need to remove `FlightDeck` from your `.APPDATA` folder
-
-## How does FlightDeck do optimization?
-I have provided a writeup on what FlightDeck is doing to help your game run a bit smoother. Check it out [here](.github/docs/optimization.md)
 
 ## FAQ
 * I don't see my Flaming Cliffs aircraft in the Kneeboards tab?
