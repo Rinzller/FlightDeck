@@ -74,9 +74,6 @@ If you encounter specific issues, please create an issue [here](https://github.c
 * A detailed step-by-step walkthrough of what you did to encounter the issue
 
 ## Coming Soon<sub><sup><sub><sup>TM</sup></sub></sup></sub>
-* Prettify the 'Latest Changelog' section on the 'Home' tab
-* Add the weekly newsletter to the 'Home' tab
-* Optimization, additional error handling and logging
 * Add ability for the kneeboards feature to work with Flaming Cliffs
 * Application framework conversion to Tauri
   * This will require a full rewrite but should reduce the memory used by the application by 80%
