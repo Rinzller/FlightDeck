@@ -15,7 +15,16 @@ FlightDeck aims to do a variety of tasks that a virtual pilot would be encourage
   * FlightDeck allows you to drag-n-drop kneeboards from the web, your desktop, or other popular applications like Discord directly into your aircraft
   * FlightDeck allows you to reorder your kneeboards and how they appear in your aircraft
   * FlightDeck allows you to remove unused or unwanted kneeboards from your aircraft
+  * FlightDeck can disable built-in airfield kneeboards and restore them later
 * Manage installed modules easily
+  * Uninstall and reinstall modules that FlightDeck previously removed
+  * Move large modules to another drive while keeping DCS pointed at them with symbolic links
+  * Quickly filter linked and non-linked modules
+* Manage DCS mods
+  * Add one or more OMM repositories and install selected packages
+  * Add local mod archives and map folders to either Saved Games or your DCS install
+  * Track installed, up-to-date, update available, new install, and degraded mod states
+  * Uninstall mods installed by FlightDeck and refresh the installed mod scan when needed
 * Change any DCS setting that would require a restart
   * Any DCS setting that would force a restart has now been moved here and allows you to change those settings before launching the game thus removing the need to restart the game... since it hasn't been started yet.
 * Cleaning and/or repairing DCS
@@ -31,6 +40,14 @@ Flying with a virtual squadron and constantly getting updated kneeboards for you
 ## Startup Applications before DCS
 Add up to ten applications to launch before DCS launches...
 ![Kneeboards](.github/media/Startup.png)
+
+## Module Management
+Uninstall modules you are not using, reinstall modules that FlightDeck previously removed, or move large modules to another drive while keeping DCS linked to them.
+![Modules](.github/media/Modules.png)
+
+## Mod Manager
+Install mods from OMM repositories or local archives, track available updates, and remove mods installed through FlightDeck.
+![ModManager](.github/media/ModManager.png)
 
 ## OS Requirements
 * Windows 10 or Windows 11
